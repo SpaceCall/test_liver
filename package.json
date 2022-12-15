@@ -1,0 +1,24 @@
+{
+  "name": "liver",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "space_call",
+  "license": "ISC",
+  "dependencies": {
+    "socket.io": "^4.5.4"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SpaceCall/test_liver.git"
+  },
+  "bugs": {
+    "url": "https://github.com/SpaceCall/test_liver/issues"
+  },
+  "homepage": "https://github.com/SpaceCall/test_liver#readme",
+  "description": ""
+}
