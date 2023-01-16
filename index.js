@@ -2,7 +2,7 @@ function createServer(){
     const fs = require( 'fs' );
     const http = require( 'http' );
     const server = http.createServer( onConnectionHttp );
-    const port = 1085;
+    const port = 3000;
     const io = require('socket.io');
     const ioServer = io( server );
 
