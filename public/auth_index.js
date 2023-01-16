@@ -1,5 +1,5 @@
 const socket_config = { transports: ['websocket']};
-const adress = 'test-liver.vercel.app';
+const adress = 'https://test-liver.vercel.app/';
 const port = 3000;
 const socket = io( `http://${ adress }:${ port }` , socket_config );
 
