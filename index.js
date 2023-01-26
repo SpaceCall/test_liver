@@ -7,14 +7,14 @@ function createServer(){
     app.listen( PORT,(error)=>{
         error ? console.log(error) : console.log( `server listening port ${PORT}` );
     });
+    app.use(express.static('public'));
+
+
+
     app.get('/',(req, res)=>{
-        res.sendFile(createPath('index.html'));
+        res.sendFile(createPath('auth_index'));
     });
-    
-    app.use((req, res) =>{
-        res
-            .status(404)
-            .sendFile(createPath('error.html'));
-    });
+
+
 }
 createServer();
