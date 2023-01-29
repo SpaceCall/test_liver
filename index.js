@@ -1,73 +1,30 @@
-function createServer(){
-    const fs = require( 'fs' );
-    const http = require( 'http' );
-    const server = http.createServer( onConnectionHttp );
-    const port = 8085;
+const express = require('express');
+const app = express();
+const {createServer} = require('http');
+const {Server} = require('socket.io');
+const httpServer = createServer(app);
+const io = new Server(httpServer);
 
-    const io = require('socket.io');
-    const ioServer = io( server );
-
-    ioServer.set('transports', ['websocket']);
-    ioServer.on('connection', onConnectSocket );
-
-
-    // обработка http запросов ( http сервер выдает файлы )
-    function onConnectionHttp( req, res ){
-
-        console.log( 'connection' );
-
-        if( req.url === '/' ){
-            fs.readFile('public/auth_index.html',(err,data)=>{
-                if( err ) console.log( err );
-                res.end( data );
-            });
+app.get('/', function (req, res) {
+    res.sendFile(__dirname + '/public' + '/auth_index.html');
+});
+app.get('/auth_style.css', function (req, res) {
+    res.sendFile(__dirname + '/public'+ '/auth_style.css');
+});
+app.get('/auth_index.js', function (req, res) {
+    res.sendFile(__dirname + '/public' + '/auth_index.js');
+});
+io.on('connection', function (socket) {
+    console.log('New user connected');
+    socket.on("send_auth_data",({email_data, pass_data})=>{
+        console.log(email_data);
+        console.log(pass_data);
+        if(email_data == 'admin@admin' && pass_data == 'admin')
+        {
+            console.log("Problem");
+            socket.emit('send_auth_data', true);
         }
-        else if( req.url === '/auth_style.css' ){
-            fs.readFile('public/auth_style.css',(err,data)=>{
-                if( err ) console.log( err );
-                res.end( data );
-            });
-        }
-        else if( req.url === '/auth_index.js' ){
-            fs.readFile('public/auth_index.js',(err,data)=>{
-                if( err ) console.log( err );
-                res.end( data );
-            });
-        }
-    }
+    })
+});
 
-
-    // Обработка socket.io запросов
-    function onConnectSocket( socket ){
-        console.log('ioServer : new socket connected');
-        /*
-            схема обработки сообщений пользователя
-            socket - подключенный пользователь
-
-            socket.on('название канала связи',( полученные данные )=>{
-                // что-то делаем
-            });
-
-            // отправка юзеру данных
-            socket.emit( 'название канала связи', параметры );
-
-            // отправка данных всем юзерам, кроме текущего
-            socket.broadcast.emit( 'название канала связи', параметры );
-
-            // отправка данных всем юзерам
-            ioServer.emit( 'название канала связи', параметры );
-        */
-        /*---- тут установка прослушивания на действия ( обработка собщений сервером -------*/
-
-
-
-
-
-
-    }
-
-    server.listen( port,()=>{
-        console.log( 'server online' );
-    });
-}
-createServer()
+httpServer.listen(5000);
