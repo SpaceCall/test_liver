@@ -1,0 +1,28 @@
+.nav-bar{
+    position: absolute;
+    width: 20%;
+    height: 100%;
+    box-shadow: 0px 1px 10px rgba(0,0,0,0.3);
+    display:block;
+    margin:0 auto;
+    left: -17%;
+}
+.nav-bar:hover {
+    left: 0%;
+}
+.nav-butt {
+    display: block;
+    background-color: aqua;
+    margin-left:1%;
+    margin-top:1%;
+}
+.nav-open-butt {
+    height: 25px;
+    width: 25px;
+    margin: 8px;
+    right: 0px;
+}
+.nav-open {
+    float: right;
+    display: block;
+}

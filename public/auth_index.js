@@ -9,6 +9,11 @@ socket.on('connect', ()=>{
         if(ans)
         {
             alert("You are in");
+            document.cookie = "id=admin";
+            alert(document.cookie);
+            setTimeout(function(){
+                window.location.href = "/cabinet";
+            },  1000)
         }
     });
 
