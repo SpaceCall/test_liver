@@ -1,9 +1,13 @@
 const express = require('express');
-const app = express();
 const {createServer} = require('http');
 const {Server} = require('socket.io');
+const fileUpload = require('express-fileupload')
+const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer);
+
+
+app.use(fileUpload());
 
 app.get('/', function (req, res) {
     res.sendFile(__dirname + '/public' + '/auth_index.html');
@@ -32,6 +36,17 @@ app.get('/add-patient', function (req, res) {
 app.get('/patients', function (req, res) {
     res.sendFile(__dirname + '/public' + '/patients_index.html');
 });
+
+app.post('/add-patient/upload', (req, res) => {
+    // Log the files to the console
+    console.log(req);
+    console.log(req.files);
+
+    // All good
+    res.sendStatus(200);
+});
+
+
 io.on('connection', function (socket) {
     console.log('New user connected');
     socket.on("send_auth_data",({email_data, pass_data})=>{

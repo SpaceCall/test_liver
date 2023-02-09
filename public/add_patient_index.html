@@ -20,5 +20,26 @@
         <a href="/add-patient">Добавить пациента</a>
     </div>
 </div>
+<div class="patient-data">
+    <form action="/add-patient/upload" method="POST" enctype="multipart/form-data">
+        <div>
+            <!-- doctors -->
+        </div>
+        <input class="input-group-patient"  placeholder="FIO" name="fio">
+        <input class="input-group-patient"  placeholder="Age" name="age">
+        <input class="input-group-patient"  placeholder="Height" name="height">
+        <input class="input-group-patient"  placeholder="Weight" name="weight">
+        <div>
+            <!-- analyzes -->
+        </div>
+        <div id = "photo-table">
+            <input type="file" accept="image/*" name="image" id="file"  onchange="loadFile(event)" style="display: none;">
+            <label for="file" class="input-group-patient">Upload Image</label>
+            <img id="output">
+            <button type="submit" class="submit-button">Upload</button>
+        </div>
+    </form>
+</div>
+<script src='cabinet_index.js'></script>
 </body>
 </html>

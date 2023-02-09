@@ -1,11 +1,13 @@
 .nav-bar{
-    position: absolute;
+    position: fixed;
     width: 20%;
     height: 100%;
     box-shadow: 0px 1px 10px rgba(0,0,0,0.3);
+    background-color: #E8FDFF;
     display:block;
     margin:0 auto;
     left: -17%;
+    z-index: 10;
 }
 .nav-bar:hover {
     left: 0%;
@@ -25,4 +27,27 @@
 .nav-open {
     float: right;
     display: block;
+}
+.patients-table
+{
+    width: 80%;
+    position:absolute;
+    left: 15%;
+    top: 5%;
+    background-color: aquamarine;
+
+}
+.input-group-patient{
+    display: block;
+    width: 30%;
+    border: none;
+    background-color: rgba(125,125,125,0.15);
+    padding: 15px 0px 15px 14px;
+    margin-bottom: 16px;
+    margin-left: 8%;
+    z-index: 2;
+}
+.input-group-patient-photos{
+    display: block;
+
 }
