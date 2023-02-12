@@ -51,3 +51,37 @@
     display: block;
 
 }
+#photo-table{
+    position: absolute;
+    left: 100px;
+}
+#crop-image-background{
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    background-color: rgba(36, 32, 32, 0.7);
+}
+#crop-image-butt
+{
+    position: absolute;
+    left: 5%;
+    bottom: 5%;
+    box-shadow: 0px 1px 10px rgba(0,0,0,0.3);
+    background-color: rgba(125,125,125,0.15);
+}
+#crop-image-box
+{
+    display: none;
+    position: absolute;
+    left: 20px;
+    top: 20px;
+    box-shadow: 0px 1px 10px rgba(0,0,0,0.3);
+}
+#photo-table
+{
+    display: block;
+}
+#crop-image{
+    display: block;
+    max-width: 100%;
+}
