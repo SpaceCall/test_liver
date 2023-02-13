@@ -7,7 +7,7 @@ const httpServer = createServer(app);
 const io = new Server(httpServer);
 
 
-app.use(fileUpload());
+
 
 app.get('/', function (req, res) {
     res.sendFile(__dirname + '/public' + '/auth_index.html');
