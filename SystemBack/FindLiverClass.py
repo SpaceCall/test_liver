@@ -2,6 +2,9 @@
 # Authors: Vitalii Babenko
 # Contacts: vbabenko2191@gmail.com
 
+from base64 import b64decode
+from TextureMatrices import get_greyscale_matrix, get_eq_matrix, get_glcm, get_glrlm
+from numpy import asarray, concatenate
 from TextureFeatures import get_all_features
 from joblib import load
 from os.path import join
@@ -122,11 +125,23 @@ def get_mean_signs(sensor_type, img_f):
     return [res1, res2, res3]
 
 
-def get_classification_results(task_type, texture_matrices):
-    if task_type == 1:
+def get_classification_results(filename, task_type):
+    # Getting texture matrices for Feature Engineering
+    matrix = get_greyscale_matrix(filename)  # original image
+    orig_gm = asarray(matrix, int)  # converted to numpy 2D array
+    gm = get_eq_matrix(orig_gm)  # equalization process
+    glcm0 = get_glcm(gm, 0).values  # gray-level co-occurrence matrix (0 angle)
+    conc_matrix = concatenate(gm, axis=None)  # convert GM from 2-D to 1-D
+    glrlm0 = get_glrlm(conc_matrix)  # grey-level run length matrix (0 angle)
+    glcm90 = get_glcm(gm, 90)  # gray-level co-occurrence matrix (90 angle)
+    conc_matrix = concatenate(gm.T, axis=None)  # transporting matrix
+    glrlm90 = get_glrlm(conc_matrix)  # grey-level run length matrix (90 angle)
+    texture_matrices = {'gm': gm, 'glcm0': glcm0, 'glcm90': glcm90, 'glrlm0': glrlm0, 'glrlm90': glrlm90}
+
+    if int(task_type) == 1:
         task = 'red'
         image_features = get_all_features(task, texture_matrices)
-        gbm = load(join('Classifiers/LightGBM', task + '.pkl'))
+        gbm = load('D:\\programs\\gits\\Liver\\test_liver\\SystemBack\\Classifiers\\LightGBM\\'+ task + '.pkl')
         y_pred = gbm.predict(image_features)[0]
         y_proba = gbm.predict_proba(image_features)[0][y_pred]
         if y_pred == 0:
@@ -136,8 +151,16 @@ def get_classification_results(task_type, texture_matrices):
             return {'prediction': 'pathology',
                     'probability': y_proba}
 
-    elif task_type == 2:
+    elif int(task_type) == 2:
         tasks = ['red', 'orange', 'yellow', 'green', 'sky', 'blue', 'purple']
+        # tasks names
+        names = {'red': '0 vs 1-2-3-4',
+                 'orange': '0-1 vs 2-3-4',
+                 'yellow': '0-1-2 vs 3-4',
+                 'green': '0-1-2-3 vs 4',
+                 'sky': '1-2 vs 3-4',
+                 'blue': '1 vs 2-3-4',
+                 'purple': '1-2-3 vs 4'}
         predictions = {'red': ['0', '1-2-3-4'],
                        'orange': ['0-1', '2-3-4'],
                        'yellow': ['0-1-2', '3-4'],
@@ -148,10 +171,10 @@ def get_classification_results(task_type, texture_matrices):
         res = []
         for task in tasks:
             image_features = get_all_features(task, texture_matrices)
-            gbm = load(join('Classifiers/LightGBM', task + '.pkl'))
+            gbm = load("D:\\programs\\gits\\Liver\\test_liver\\SystemBack\\Classifiers\\LightGBM\\"+task + '.pkl')
             y_pred = gbm.predict(image_features)[0]
             y_proba = gbm.predict_proba(image_features)[0][y_pred]
-            res.append({'task': task,
+            res.append({'task': names[task],
                         'prediction': predictions[task][y_pred],
                         'probability': y_proba})
         return res

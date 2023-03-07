@@ -27,7 +27,7 @@ def glrlm_features(image_features, glrlm, glrlm_type, cropped_runs, max_len=5):
 
 
 def get_all_features(task, texture_matrices):
-    with open(join('Settings', task + '.json')) as f:
+    with open('D:\\programs\\gits\\Liver\\test_liver\\SystemBack\\Settings\\'+ task + '.json') as f:
         settings = load(f)
     init_gm = texture_matrices['gm']
     glcm0, glcm90 = texture_matrices['glcm0'], texture_matrices['glcm90']
@@ -60,7 +60,7 @@ def get_all_features(task, texture_matrices):
     ## vert glrlm (90 degree)
     image_features = glrlm_features(image_features, glrlm90, 'vert', settings['glrlm90_runs'])
 
-    with open(join('SelectedFeatures', task + '.json')) as f:
+    with open("D:\\programs\\gits\\Liver\\test_liver\\SystemBack\\SelectedFeatures\\"+ task+ '.json') as f:
         selected = load(f)
 
     data, row = [], []

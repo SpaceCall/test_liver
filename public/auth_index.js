@@ -8,9 +8,7 @@ socket.on('connect', ()=>{
         console.log(ans);
         if(ans)
         {
-            alert("You are in");
-            document.cookie = "id=admin";
-            alert(document.cookie);
+            document.cookie = `id=${ans}`;
             setTimeout(function(){
                 window.location.href = "/cabinet";
             },  1000)

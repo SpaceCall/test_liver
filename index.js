@@ -15,7 +15,8 @@ const path = require('path');
 const db = mysql.createConnection({
     host: "localhost",
     user: "root",
-    password: "pendanyou"
+    password: "pendanyou",
+    database: "liver"
 });
 
 db.connect(function(err) {
@@ -76,12 +77,25 @@ app.post('/add-patient/analyze',jsonParser, (req, res) => {
     let directoryPath = path.join(__dirname,`public`, `${id}`, `${patient_id}`);
     let files = fs.readdirSync(directoryPath);
     let analyze="";
-    files.forEach((elem)=>{elem = path.join(__dirname, `${id}`, `${patient_id}`,`${elem}`)});
-    PythonShell.run('/SystemBack/pythonfile.py', {args:files[0],1,}).then(messages=>{
+    for(let i=0;i<files.length;i++)
+    {
+        files[i] = "public"+`/${id}`+`/${patient_id}`+`/${files[i]}`;
+    }
+    //files.forEach((elem)=>{elem = __dirname+`/${id}`+ `/${patient_id}`+`/${elem}`});
+    console.log(files[0]);
+    let task_data = req.body.task;
+    let Image_path = (__dirname + `/public/${id}/${patient_id}/`);
+    let base64String = req.body.image;
+    let base64Image = base64String.split(';base64,').pop();
+    fs.writeFile(Image_path+"1.png", base64Image, {encoding: 'base64'}, function(err) {
+
+    });
+    PythonShell.run(__dirname+'/SystemBack/pythonfile.py', {args:[files[0],task_data]}).then(messages=>{
 
         console.log('results: %j', messages);
+        console.log('results: %j', messages[0]);
         analyze = messages[0];
-        res.send({answer:analyze});
+        res.send({task: task_data,answer:analyze});
     });
 
 
@@ -92,10 +106,17 @@ io.on('connection', function (socket) {
     socket.on("send_auth_data",({email_data, pass_data})=>{
         console.log(email_data);
         console.log(pass_data);
-        if(email_data == 'admin@admin' && pass_data == 'admin')
-        {
-            socket.emit('send_auth_data', true);
-        }
+        db.query("SELECT * FROM users",
+            function(err, results, fields) {
+                console.log(err);
+                console.log(results); // собственно данные
+                //console.log(fields); // мета-данные полей
+                if(email_data == results[0]["Email"] && pass_data == results[0]["Password"])
+                {
+                    socket.emit('send_auth_data', results[0]["Users_id"]);
+                }
+            });
+
     })
 });
 
