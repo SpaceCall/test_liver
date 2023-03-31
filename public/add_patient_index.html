@@ -14,13 +14,13 @@
         <img src="nav-open-im.png" class="nav-open-butt">
     </div>
     <div class="nav-butt">
-        <a href="/cabinet">Личный кабинет</a>
+        <a href="/cabinet">Кабінет</a>
     </div>
     <div class="nav-butt">
-        <a href="/patients">Все пациенты</a>
+        <a href="/patients">Всі пацієнти</a>
     </div>
     <div class="nav-butt">
-        <a href="/add-patient">Добавить пациента</a>
+        <a href="/add-patient">Добавить пацієнта</a>
     </div>
 </div>
 <form action="/add-patient" method="POST" enctype="multipart/form-data">
@@ -29,10 +29,10 @@
         <div>
             <!-- doctors -->
         </div>
-        <input class="input-group-patient"  placeholder="FIO" name="fio">
-        <input class="input-group-patient"  placeholder="Age" name="age">
-        <input class="input-group-patient"  placeholder="Height" name="height">
-        <input class="input-group-patient"  placeholder="Weight" name="weight">
+        <input class="input-group-patient"  placeholder="ФІО" name="fio">
+        <input class="input-group-patient"  placeholder="Вік" name="age">
+        <input class="input-group-patient"  placeholder="Зріст" name="height">
+        <input class="input-group-patient"  placeholder="Вага" name="weight">
 
 
     </div>
@@ -43,31 +43,31 @@
             <div id = "analyze-controls-container">
                 <div class = "photo-table-add-photo">
                     <input type = "file" accept="image/*" name="image" id = "add-photo" style = "display: none">
-                    <label for = "add-photo" class = "input-group-patient-add-image">Add image</label>
+                    <label for = "add-photo" class = "input-group-patient-add-image">Добавити зображення</label>
                 </div>
                 <select id = "analyze-controls-dropdown" name = "dropdown">
                     <option value = "1" selected>Норма/патологія</option>
                     <option value = "2">Ступінь фіброзу</option>
                 </select>
                 <div id = "analyze-button">
-                    Analyze
+                    Аналізувати
                 </div>
                 <div id = "analyzes">
-                    Analyzes
+                    Аналіз
                 </div>
 
         </div>
-    </div>>
+    </div>
     <div id = "photo-table">
 
     </div>
-    <button type="submit" class="input-group-patient-submit-button">Upload patient</button>
+    <!--<button type="submit" class="input-group-patient-submit-button">Upload patient</button>-->
 </form>
 <div id = "crop-container">
     <div id = "crop-image-box">
         <img id = "image">
 
-        <div id = "crop-butt">Crop</div>
+        <div id = "crop-butt">Обрізати</div>
     </div>
 </div>
 
@@ -126,48 +126,53 @@
         });
     });
     document.getElementById('analyze-button').addEventListener('click',()=>{
-        async function postData(url = '', data = {}) {
-            // Default options are marked with *
-            const response = await fetch(url, {
-                method: 'POST', // *GET, POST, PUT, DELETE, etc.
-                headers: {
-                    'Content-Type': 'application/json;charset=utf-8'
-                },
-                body: JSON.stringify(data) // body data type must match "Content-Type" header
-            });
-            return await response.json(); // parses JSON response into native JavaScript objects
-        }
-        let task_drop = +(document.getElementById("analyze-controls-dropdown").value);
-        let send_analyze_data = {
-            id: "admin",
-            patient_id: "patient",
-            task: task_drop,
-            image: work_image
-        };
-        postData('/add-patient/analyze', send_analyze_data)
-            .then((data) => {
-                console.log(data); // JSON data parsed by `response.json()` call
-                let answer_json = JSON.parse(data.answer);
-                console.log(answer_json);
-                let analyze_text_cont = "";
-                if(data.task == "1") {
-                    analyze_text_cont = `Prediction : ${answer_json["prediction"]} <br> Probability : ${answer_json["probability"].toFixed(4)}`;
-                }
-                else if(data.task == "2")
-                {
-                    for(let i=0;i<answer_json.length;i++)
-                    {
-                        analyze_text_cont +=`Task : ${answer_json[i]["task"]}
-                        Prediction : ${answer_json[i]["prediction"]}
-                        Probability : ${answer_json[i]["probability"].toFixed(4)}<br>`;
+        console.log(document.getElementById('analyze-photo-container').hasChildNodes());
+        if(document.getElementById('analyze-photo-container').hasChildNodes())
+        {
+            async function postData(url = '', data = {}) {
+                // Default options are marked with *
+                const response = await fetch(url, {
+                    method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                    headers: {
+                        'Content-Type': 'application/json;charset=utf-8'
+                    },
+                    body: JSON.stringify(data) // body data type must match "Content-Type" header
+                });
+                return await response.json(); // parses JSON response into native JavaScript objects
+            }
+
+            let task_drop = +(document.getElementById("analyze-controls-dropdown").value);
+            let send_analyze_data = {
+                id: "admin",
+                patient_id: "patient",
+                task: task_drop,
+                image: work_image
+            };
+            postData('/add-patient/analyze', send_analyze_data)
+                .then((data) => {
+                    console.log(data); // JSON data parsed by `response.json()` call
+                    console.log(data.answer);
+                    let answer_json = JSON.parse(data.answer.replace(/'/g, '"'));
+                    console.log(answer_json);
+                    let analyze_text_cont = "";
+                    if (data.task == 1) {
+                        analyze_text_cont = `Аналіз : ${answer_json["prediction"]} <br> Ймовірність : ${answer_json["probability"].toFixed(4)}`;
+                    } else if (data.task == "2") {
+                        for (let i = 0; i < answer_json.length; i++) {
+                            analyze_text_cont += `Задача : ${answer_json[i]["task"]}
+                            Аналіз : ${answer_json[i]["prediction"]}
+                            Ймовірність : ${answer_json[i]["probability"].toFixed(4)}<br>`;
+                        }
+                    } else {
+                        analyze_text_cont = "Error";
                     }
-                }
-                else
-                {
-                    analyze_text_cont = "Error";
-                }
-                document.getElementById("analyzes").innerHTML = analyze_text_cont;
-            });
+                    document.getElementById("analyzes").innerHTML = analyze_text_cont;
+                });
+        }
+        else
+        {
+            alert("Вставте зображення");
+        }
     });
 
 </script>

@@ -2,7 +2,6 @@
 # Authors: Vitalii Babenko
 # Contacts: vbabenko2191@gmail.com
 
-from base64 import b64decode
 from TextureMatrices import get_greyscale_matrix, get_eq_matrix, get_glcm, get_glrlm
 from numpy import asarray, concatenate
 from TextureFeatures import get_all_features
@@ -138,20 +137,28 @@ def get_classification_results(filename, task_type):
     glrlm90 = get_glrlm(conc_matrix)  # grey-level run length matrix (90 angle)
     texture_matrices = {'gm': gm, 'glcm0': glcm0, 'glcm90': glcm90, 'glrlm0': glrlm0, 'glrlm90': glrlm90}
 
-    if int(task_type) == 1:
+    if str(task_type) == '1':
         task = 'red'
         image_features = get_all_features(task, texture_matrices)
-        gbm = load('D:\\programs\\gits\\Liver\\test_liver\\SystemBack\\Classifiers\\LightGBM\\'+ task + '.pkl')
+        scaler = load(join('SystemBack/StandardScaler', task + '.gz'))
+        image_features = scaler.transform(image_features)
+        scaler = load(join('SystemBack/MinMaxScaler', task + '.gz'))
+        image_features = scaler.transform(image_features)
+        gbm = load(join('SystemBack/Classifiers/LightGBM', task + '.pkl'))
         y_pred = gbm.predict(image_features)[0]
         y_proba = gbm.predict_proba(image_features)[0][y_pred]
         if y_pred == 0:
+            print({'prediction': 'norma',
+                    'probability': y_proba})
             return {'prediction': 'norma',
                     'probability': y_proba}
         else:
+            print({'prediction': 'pathology',
+                    'probability': y_proba})
             return {'prediction': 'pathology',
                     'probability': y_proba}
 
-    elif int(task_type) == 2:
+    elif str(task_type) == '2':
         tasks = ['red', 'orange', 'yellow', 'green', 'sky', 'blue', 'purple']
         # tasks names
         names = {'red': '0 vs 1-2-3-4',
@@ -171,12 +178,17 @@ def get_classification_results(filename, task_type):
         res = []
         for task in tasks:
             image_features = get_all_features(task, texture_matrices)
-            gbm = load("D:\\programs\\gits\\Liver\\test_liver\\SystemBack\\Classifiers\\LightGBM\\"+task + '.pkl')
+            scaler = load(join('SystemBack/StandardScaler', task + '.gz'))
+            image_features = scaler.transform(image_features)
+            scaler = load(join('SystemBack/MinMaxScaler', task + '.gz'))
+            image_features = scaler.transform(image_features)
+            gbm = load(join('SystemBack/Classifiers/LightGBM', task + '.pkl'))
             y_pred = gbm.predict(image_features)[0]
             y_proba = gbm.predict_proba(image_features)[0][y_pred]
             res.append({'task': names[task],
                         'prediction': predictions[task][y_pred],
                         'probability': y_proba})
+        print(res)
         return res
     else:
         print('Error')

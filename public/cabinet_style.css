@@ -219,7 +219,7 @@ body {
 {
     max-width: 70%;
     display: flex;
-    background-color: #eeeeee;
+
 
     padding-top: 20px;
     margin-right: auto;
@@ -243,7 +243,7 @@ body {
 #analyze-photo-container
 {
     position: relative;
-    background-color: #97d1d9;
+
     height: 300px;
     width: 300px;
     background-repeat: no-repeat;
