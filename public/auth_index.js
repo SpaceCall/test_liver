@@ -2,13 +2,20 @@
 
 const socket = io();
 
+function setCookie(cname, cvalue, exdays) {
+    const d = new Date();
+    d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    let expires = "expires="+ d.toUTCString();
+    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+}
+
 socket.on('connect', ()=>{
     console.log( 'socket connected' );
     socket.on('send_auth_data', (ans)=>{
         console.log(ans);
         if(ans)
         {
-            document.cookie = `id=${ans}`;
+            setCookie('id', ans,1);
             setTimeout(function(){
                 window.location.href = "/cabinet";
             },  1000)

@@ -56,6 +56,16 @@ app.get('/add-patient', function (req, res) {
 app.get('/patients', function (req, res) {
     res.sendFile(__dirname + '/public' + '/patients_index.html');
 });
+app.post('/patients/getPatients', function (req, res) {
+    db.query("SELECT patients.Patients_id,patients.FIO " +
+        `FROM patients JOIN users_patients where users_patients.Users_id = '${req.body.id}' ` +
+        "AND users_patients.Patients_id = patients.Patients_id;",  (err, results, fields)=> {
+        console.log(err);
+        console.log(results); // собственно данные
+        //console.log(fields); // мета-данные полей
+        res.send(results);
+    });
+});
 
 app.post('/add-patient/upload-photo',jsonParser, (req, res) => {
     // Log the files to the console
@@ -100,21 +110,40 @@ app.post('/add-patient/analyze',jsonParser, (req, res) => {
 
 
 });
+app.post('/add_patient/getPatientData',jsonParser, (req, res) => {
+    let id = req.body.id;
+    db.query(` SELECT * FROM patients WHERE Patients_id='${id}';`,  (err, results, fields)=> {
+        console.log(err);
+        console.log(results); // собственно данные
+        //console.log(fields); // мета-данные полей
+        res.send(results[0]);
+    });
+});
+app.post('/add-patient/createRecord',jsonParser, (req, res) => {
+    let fio = req.body.fio;
+    db.query(`INSERT INTO patients (Patients_id, FIO) OUTPUT INSERTED.Patients_id values (UUID(),'${fio}');`,  (err, results, fields)=> {
+            console.log(err);
+            console.log(results); // собственно данные
+            //console.log(fields); // мета-данные полей
+        });
+});
+
 
 io.on('connection', function (socket) {
     console.log('New user connected');
     socket.on("send_auth_data",({email_data, pass_data})=>{
         console.log(email_data);
         console.log(pass_data);
-        db.query("SELECT * FROM users",
-            function(err, results, fields) {
+
+        db.query(`SELECT * FROM users WHERE Email='${email_data}' AND Password='${pass_data}'`,(err, results, fields)=> {
                 console.log(err);
                 console.log(results); // собственно данные
                 //console.log(fields); // мета-данные полей
-                if(email_data == results[0]["Email"] && pass_data == results[0]["Password"])
+                if(results.length!=0)
                 {
                     socket.emit('send_auth_data', results[0]["Users_id"]);
                 }
+                console.log('wrong');
             });
 
     })

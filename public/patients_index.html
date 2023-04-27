@@ -20,8 +20,61 @@
         <a href="/add-patient">Добавить пацієнта</a>
     </div>
 </div>
-<div class="patients-table">
+<div id="patients_table">
 
 </div>
+<script>
+    function setCookie(cname, cvalue, exdays) {
+        const d = new Date();
+        d.setTime(d.getTime() + (exdays*24*60*60*1000));
+        let expires = "expires="+ d.toUTCString();
+        document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+    }
+    function getCookie(cname) {
+        let name = cname + "=";
+        let decodedCookie = decodeURIComponent(document.cookie);
+        let ca = decodedCookie.split(';');
+        for(let i = 0; i <ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
+    }
+    window.onload=()=>{
+        async function getData(url = '', data = {}) {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8'
+                },
+                body: JSON.stringify(data)
+            });
+            return await response.json();
+        }
+        let id = getCookie('id');
+
+        getData('/patients/getPatients',{id:id}).then((data) => {
+            let parent_container = document.getElementById('patients_table');
+            console.log(data); // JSON data parsed by `response.json()` call
+            for(let patient=0;patient<data.length;patient++){
+                let patient_div = document.createElement('div');
+                patient_div.classList.add('patient_container');
+                patient_div.innerHTML = `<a href="/add-patient">${data[patient].FIO}</a>`;
+                patient_div.addEventListener('click',()=>{
+                    setCookie('patient_id', data[patient].Patients_id, 1);
+
+                });
+                parent_container.appendChild(patient_div);
+                console.log(data[patient].FIO);
+                console.log(data[patient].Patients_id);
+            }
+        });
+    };
+</script>
 </body>
 </html>
