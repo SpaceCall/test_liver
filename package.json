@@ -1,30 +1,44 @@
 {
-  "name": "liver",
+  "name": "node-json-api-free",
   "version": "1.0.0",
+  "description": "",
   "main": "index.js",
-  "scripts": {
-    "start": "node index.js"
-  },
-  "keywords": [],
-  "author": "space_call",
-  "license": "ISC",
   "dependencies": {
-    "body-parser": "^1.20.2",
-    "express": "^4.18.2",
-    "express-fileupload": "^1.4.0",
-    "mysql2": "^3.1.2",
+
+    "body-parser": "^1.20.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.5.0",
+    "mysql": "^2.18.1",
+    "mysql2": "^2.3.3",
+    "node-cron": "^3.0.2",
+    "nodemailer": "^6.7.5",
+    "nodemon": "^2.0.16",
+    "passport": "^0.6.0",
+    "passport-jwt": "^4.0.0",
+    "passport-local": "^1.0.0",
+    "pg": "^8.7.3",
     "python-shell": "^5.0.0",
-    "socket.io": "^4.5.4",
-    "vanilla-image-cropper": "^1.4.0"
+    "random-token": "0.0.8",
+    "sequelize": "^6.31.0"
   },
-  "devDependencies": {},
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/SpaceCall/test_liver.git"
+  "type": "module",
+  "devDependencies": {
+    "@babel/cli": "^7.17.10",
+    "@babel/core": "^7.18.5",
+    "@babel/node": "^7.18.5",
+    "@babel/plugin-proposal-class-properties": "^7.17.12",
+    "@babel/plugin-proposal-object-rest-spread": "^7.18.0",
+    "@babel/preset-env": "^7.18.2",
+    "@babel/register": "^7.17.7",
+    "sequelize-cli": "^6.4.1"
   },
-  "bugs": {
-    "url": "https://github.com/SpaceCall/test_liver/issues"
+  "scripts": {
+    "start:dev": "nodemon --exec babel-node --experimental-specifier-resolution=node src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "homepage": "https://github.com/SpaceCall/test_liver#readme",
-  "description": ""
+  "author": "",
+  "license": "ISC"
 }
