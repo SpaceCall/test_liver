@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 
 const router = express.Router();
 import { getProfileRouteHandler, patchProfileRouteHandler, getPatientsRouteHandler,
-  createPatientRouteHandler,changePatientRouteHandler,getPatientRouteHandler,uploadImgRouteHandler } from "../../services/me";
+  createPatientRouteHandler,changePatientRouteHandler,getPatientRouteHandler,uploadImgRouteHandler } from "../../services/me/index.js";
 import fs from "fs";
 import path from "path";
 import {PythonShell} from 'python-shell';

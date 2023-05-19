@@ -1,8 +1,8 @@
 //import bcrypt from "bcrypt";
 import dotenv from 'dotenv';
-import { userModel } from "../../schemas/user.model";
-import { patientModel } from "../../schemas/patient.model";
-import { users_patientsModel } from "../../schemas/users_patients.model";
+import { userModel } from "../../schemas/user.model.js";
+import { patientModel } from "../../schemas/patient.model.js";
+import { users_patientsModel } from "../../schemas/users_patients.model.js";
 import { Op } from "sequelize";
 import jwt from 'jsonwebtoken';
 import fs from 'fs';

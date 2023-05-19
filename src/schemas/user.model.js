@@ -1,5 +1,5 @@
 import {DataTypes } from "sequelize";
-import { dbConnect } from "../mysql";
+import { dbConnect } from "../mysql/index.js";
 
 const _userModel = dbConnect.define("user", {
   Users_id: {

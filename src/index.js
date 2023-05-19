@@ -3,14 +3,14 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 import "./passport.js";
-import { dbConnect } from "./mysql";
-import { meRoutes, authRoutes } from "./routes";
+import { dbConnect } from "./mysql/index.js";
+import { meRoutes, authRoutes } from "./routes/index.js";
 import path from "path";
 import * as fs from "fs";
 import cron from "node-cron";
-import { userModel } from "./schemas/user.model";
-import { patientModel } from "./schemas/patient.model";
-import { users_patientsModel } from "./schemas/users_patients.model";
+import { userModel } from "./schemas/user.model.js";
+import { patientModel } from "./schemas/patient.model.js";
+import { users_patientsModel } from "./schemas/users_patients.model.js";
 userModel.sync().then(()=>{
   const admin = userModel. findOrCreate({where:
   { Name: "admin", Email: "doctor@doctor", Password: "doctor",
