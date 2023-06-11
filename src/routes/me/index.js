@@ -61,6 +61,8 @@ router.post('/patient/analyze',(req, res) => {
   let directoryPath = path.join(`${__dirname}/imagesdb`, `${id}`, `${patient_id}`);
   let files = fs.readdirSync(directoryPath);
   let analyze="";
+  console.log(files);
+  console.log(directoryPath);
   for(let i=0;i<files.length;i++)
   {
     files[i] = `${__dirname}/imagesdb/${id}`+`/${patient_id}`+`/${files[i]}`;

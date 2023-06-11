@@ -37,6 +37,7 @@
   },
   "scripts": {
     "start:dev": "nodemon --exec babel-node --experimental-specifier-resolution=node src/index.js",
+    "start": "nodemon --exec node src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
