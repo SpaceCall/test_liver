@@ -3,9 +3,12 @@ import dotenv from 'dotenv';
 import { userModel } from "../../schemas/user.model.js";
 import { patientModel } from "../../schemas/patient.model.js";
 import { users_patientsModel } from "../../schemas/users_patients.model.js";
+import { analyzesModel } from "../../schemas/analyzes.model.js";
 import { Op } from "sequelize";
 import jwt from 'jsonwebtoken';
 import fs from 'fs';
+import path from "path";
+import {PythonShell} from "python-shell";
 
 dotenv.config();
 
@@ -181,22 +184,106 @@ export const getPatientRouteHandler = async (req, res)=>{
     res.send(patient);
   });
 }
-
 export const uploadImgRouteHandler = async (req, res)=>{
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file uploaded' });
+  }
+  console.log("problem");
   let patient_id = req.body.patient_id;
-
-  const __dirname = fs.realpathSync(".");
+  console.log(patient_id);
   let doctor_id = req.body.doctor_id;
-  let date = Date.now();
-  let Image_path = (`${__dirname}/imagesdb/${doctor_id}/${patient_id}/${date}.png`);
+  console.log(doctor_id);
+  let type = req.body.type;
+  console.log(req.file);
+  let dirname = fs.realpathSync(".");
+  let originalFileName = req.file.originalname;
+  let fileExtension = path.extname(originalFileName);
+  let fileName = `${Date.now() + '-' + Math.round(Math.random() * 1E9)}.${fileExtension}`;
+  if (!fs.existsSync(path.join(dirname,'imagesdb',doctor_id,patient_id,'originals'))){
+    fs.mkdirSync(path.join(dirname,'imagesdb',doctor_id,patient_id,'originals'), { recursive: true });
+  }
+  if (!fs.existsSync(path.join(dirname,'imagesdb',doctor_id,patient_id,'analyzedImages'))){
+    fs.mkdirSync(path.join(dirname,'imagesdb',doctor_id,patient_id,'analyzedImages'), { recursive: true });
+  }
+  fs.renameSync(req.file.path, path.join(dirname,'imagesdb',doctor_id,patient_id,type,fileName));
+  //fs.renameSync(req.file.path, path.join(dirname,'imagesdb',doctor_id,patient_id,`${type}`,`${req.file.originalname}`));
+
+  return res.json({ message: 'File uploaded successfully' });
+
+}
+export const uploadImgRouteHandler2 = async (req, res)=>{
+  console.log("problem");
+  let patient_id = req.body.patient_id;
+  console.log(patient_id);
+  let doctor_id = req.body.doctor_id;
+  console.log(doctor_id);
+  let type = req.body.type;
+  let dirname = fs.realpathSync(".");
+  let Image_path = path.join(dirname,'imagesdb',doctor_id,patient_id,`${type}`,`${timeStamp}.png`);
+  let dir = path.join(dirname,'imagesdb',doctor_id,patient_id,`${type}`);
+  if (!fs.existsSync(dir)){
+    fs.mkdirSync(dir, { recursive: true });
+  }
+  let file = req.file;
+  //console.log(file);
+  fs.writeFile(Image_path, file, (err) => {
+    if (err) {
+      console.error('An error occurred while saving the file:', err);
+      res.sendStatus(500);
+    } else {
+      console.log('File saved successfully.');
+      res.sendStatus(200);
+    }
+  });
+
+}
+export const uploadImgRouteHandlerOld = async (req, res)=>{
+  let patient_id = req.body.patient_id;
+  let doctor_id = req.body.doctor_id;
+  let type = req.body.type;
+
+  let dirname = fs.realpathSync(".");
+  let Image_path = path.join(`${dirname}/imagesdb/${doctor_id}/${patient_id}/${Date.now()}.png`);
   let base64String = req.body.image;
   let base64Image = base64String.split(';base64,').pop();
   var dir = `${__dirname}/imagesdb/${doctor_id}/${patient_id}/`;
-  console.log("yes");
+
   if (!fs.existsSync(dir)){
     fs.mkdirSync(dir, { recursive: true });
   }
   fs.writeFile(Image_path, base64Image, {encoding: 'base64'}, function(err) {
 
+  });
+}
+export const analyzeRouteHandler = async (req, res)=>{
+  let id = req.body.id;
+  const dirname = fs.realpathSync(".");
+  let patient_id = req.body.patient_id;
+  let directoryPath = path.join(`${dirname}/imagesdb`, `${id}`, `${patient_id}`);
+  let files = fs.readdirSync(directoryPath);
+  let analyze="";
+  console.log(files);
+  console.log(directoryPath);
+  for(let i=0;i<files.length;i++)
+  {
+    files[i] = `${dirname}/imagesdb/${id}`+`/${patient_id}`+`/${files[i]}`;
+  }
+  //files.forEach((elem)=>{elem = __dirname+`/${id}`+ `/${patient_id}`+`/${elem}`});
+  console.log(files[0]);
+  let task_data = req.body.task;
+  let base64String = req.body.image;
+  let base64Image = base64String.split(';base64,').pop();
+  let python_path = path.join(`${dirname}`, `SystemBack`, `pythonfile.py`);
+  //let originalFileName = req.file.originalname;
+  //let fileExtension = path.extname(originalFileName);
+  let filename = `${Date.now() + '-' + Math.round(Math.random() * 1E9)}.png`;
+  let Image_path = path.join(dirname,`imagesdb`,`${id}`,`${patient_id}`,`analyzedImages`,filename);
+  fs.writeFile(Image_path, base64Image, {encoding: 'base64'}, function(err) {
+
+  });
+  PythonShell.run(path.join(`${dirname}`, `SystemBack`, `pythonfile.py`), {args:[Image_path,task_data]}).then(messages=>{
+    analyze = messages[0];
+    analyzesModel.create({ Patient_id: patient_id,FileName: filename, Analysis: analyze});
+    res.send({task: task_data,answer:analyze});
   });
 }

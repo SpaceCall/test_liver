@@ -38,9 +38,10 @@ const corsOptions = {
 
 app.use("/",express.static(path.join(fs.realpathSync("."),'/src/landing')))
 //app.use(cors(corsOptions));
-app.use(express.json({limit: '50mb'}));
-app.use(bodyParser.json({ type: "application/vnd.api+json", strict: false }));
-
+//app.use(express.json());
+//app.use(bodyParser.json({ type: "application/vnd.api+json", strict: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json({ limit: '10mb' }));
 
 
 

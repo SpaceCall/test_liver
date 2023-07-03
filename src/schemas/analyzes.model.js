@@ -14,6 +14,11 @@ const _analyzesModel = dbConnect.define("analysis", {
         unique: false,
         allowNull: false
     },
+    FileName: {
+        type: DataTypes.UUID,
+        unique: false,
+        allowNull: false
+    },
     Analysis: {
         type: DataTypes.STRING(400),
         unique: false,

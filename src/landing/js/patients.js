@@ -47,18 +47,51 @@ document.getElementById("new_patient").addEventListener('click',()=>{
 
 let id = getCookie('id');
 postData('/patients/getPatients',{id:id}).then((data) => {
-    let patients_table = document.getElementById('patients_table');
+    let patients_table_body = document.getElementById('patients_table_body');
     console.log(data);
-    data.forEach((patient)=>{
-        let div = document.createElement("button");
-        div.className = "btn btn-lg btn-primary m-2";
-        div.addEventListener("click",()=>{
-            setCookie("patient_id", patient.Patients_id,1);
-            window.location.href = "/patient";
-        });
-        div.innerHTML = patient.Name;
-        patients_table.appendChild(div);
-    });
+
+    if(data.length!=0)
+    {
+        for(let i =0;i<data.length;i++){
+            let patient_row = document.createElement("tr");
+
+            let number_cell = document.createElement("th");
+            number_cell.scope="row";
+            number_cell.innerText = (i+1).toString();
+
+            let name_cell = document.createElement("td");
+            name_cell.innerText = data[i].Name;
+
+            let edit_cell = document.createElement("td");
+            let delete_cell = document.createElement("td");
+
+            let edit_btn = document.createElement("button");
+            let delete_btn = document.createElement("button");
+            edit_btn.type = "button";
+            edit_btn.classList.add("btn");
+            edit_btn.classList.add("btn-primary");
+            edit_btn.innerText = "Редагувати";
+
+            delete_btn.type = "button";
+            delete_btn.classList.add("btn");
+            delete_btn.classList.add("btn-primary");
+            delete_btn.innerText = "Видалити";
+
+            edit_btn.addEventListener("click",()=>{
+                setCookie("patient_id", data[i].Patients_id,1);
+                window.location.href = "/patient";
+            });
+
+            edit_cell.appendChild(edit_btn);
+            delete_cell.appendChild(delete_btn);
+            patient_row.appendChild(number_cell);
+            patient_row.appendChild(name_cell);
+            patient_row.appendChild(edit_cell);
+            patient_row.appendChild(delete_cell);
+            patients_table_body.appendChild(patient_row);
+        }
+    }
+
 });
 
 
