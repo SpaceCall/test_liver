@@ -11,6 +11,7 @@ import cron from "node-cron";
 import { userModel } from "./schemas/user.model.js";
 import { patientModel } from "./schemas/patient.model.js";
 import { users_patientsModel } from "./schemas/users_patients.model.js";
+import { liverAnalyzesModel } from "./schemas/liverAnalyzes.model.js";
 userModel.sync().then(()=>{
   const admin = userModel. findOrCreate({where:
   { Name: "admin", Email: "doctor@doctor", Password: "doctor",
@@ -18,6 +19,7 @@ userModel.sync().then(()=>{
 });
 patientModel.sync();
 users_patientsModel.sync();
+liverAnalyzesModel.sync();
 
 dotenv.config();
 

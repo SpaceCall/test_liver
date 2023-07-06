@@ -223,15 +223,16 @@ function getImagesAnalyzed() {
             doctor_id: getCookie('id')
         };
         postData('/patient/getAnalyzed', UserData)
-            .then((filenames) => {
-                filenames.forEach((filename)=>{
+            .then((data) => {
+                data.forEach((file_data)=>{
+                    let filename = file_data.Filename;
                     console.log(filename);
+                    let text = file_data.text;
                     let image = document.createElement("img");
                     image.classList.style = "";
                     image.src = `${getCookie('id')}/${patients_id}/analyzedImages/${filename}`;
                     let analyz_container = document.createElement("div");
                     analyz_container.style = "width: 80%; height: 300px; display:flex";
-                    let text = "Тут будуть записані аналізи до вже проаналізовних зображень в наступній версії";
                     let span = document.createElement("span");
                     span.innerText = text;
                     analyz_container.appendChild(image);
@@ -341,21 +342,10 @@ document.getElementById('analyze-button').addEventListener('click',()=>{
             .then((data) => {
                 console.log(data); // JSON data parsed by `response.json()` call
                 console.log(data.answer);
-                let answer_json = JSON.parse(data.answer.replace(/'/g, '"'));
-                console.log(answer_json);
-                let analyze_text_cont = "";
-                if (data.task == 1) {
-                    analyze_text_cont = `Аналіз : ${answer_json["prediction"]} <br> Ймовірність : ${answer_json["probability"].toFixed(4)}`;
-                } else if (data.task == "2") {
-                    for (let i = 0; i < answer_json.length; i++) {
-                        analyze_text_cont += `Задача : ${answer_json[i]["task"]}
-                            Аналіз : ${answer_json[i]["prediction"]}
-                            Ймовірність : ${answer_json[i]["probability"].toFixed(4)}<br>`;
-                    }
-                } else {
-                    analyze_text_cont = "Error";
-                }
-                document.getElementById("workImgs_container").lastChild.lastChild.innerText = analyze_text_cont;
+                let text = data.answer;
+                console.log(text);
+
+                document.getElementById("workImgs_container").lastChild.lastChild.innerText = text;
             });
     }
     else

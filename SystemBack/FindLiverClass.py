@@ -3,7 +3,7 @@
 # Contacts: vbabenko2191@gmail.com
 
 from TextureMatrices import get_greyscale_matrix, get_eq_matrix, get_glcm, get_glrlm
-from numpy import asarray, concatenate
+from numpy import asarray, concatenate, argmax
 from TextureFeatures import get_all_features
 from joblib import load
 from os.path import join
@@ -140,21 +140,17 @@ def get_classification_results(filename, task_type):
     if str(task_type) == '1':
         task = 'red'
         image_features = get_all_features(task, texture_matrices)
-        scaler = load(join('SystemBack/StandardScaler', task + '.gz'))
+        scaler = load(join('StandardScaler', task + '.gz'))
         image_features = scaler.transform(image_features)
-        scaler = load(join('SystemBack/MinMaxScaler', task + '.gz'))
+        scaler = load(join('MinMaxScaler', task + '.gz'))
         image_features = scaler.transform(image_features)
-        gbm = load(join('SystemBack/Classifiers/LightGBM', task + '.pkl'))
+        gbm = load(join('Classifiers/LogisticRegression', task + '.pkl'))
         y_pred = gbm.predict(image_features)[0]
         y_proba = gbm.predict_proba(image_features)[0][y_pred]
         if y_pred == 0:
-            print({'prediction': 'norma',
-                    'probability': y_proba})
             return {'prediction': 'norma',
                     'probability': y_proba}
         else:
-            print({'prediction': 'pathology',
-                    'probability': y_proba})
             return {'prediction': 'pathology',
                     'probability': y_proba}
 
@@ -175,20 +171,47 @@ def get_classification_results(filename, task_type):
                        'sky': ['1-2', '3-4'],
                        'blue': ['1', '2-3-4'],
                        'purple': ['1-2-3', '4']}
+        weights = {'red': [[0], [1, 2, 3, 4]],
+                   'orange': [[0, 1], [2, 3, 4]],
+                   'yellow': [[0, 1, 2], [3, 4]],
+                   'green': [[0, 1, 2, 3], [4]]}
+        final_probabilities = [0, 0, 0, 0, 0]
         res = []
         for task in tasks:
             image_features = get_all_features(task, texture_matrices)
-            scaler = load(join('SystemBack/StandardScaler', task + '.gz'))
+            scaler = load(join('StandardScaler', task + '.gz'))
             image_features = scaler.transform(image_features)
-            scaler = load(join('SystemBack/MinMaxScaler', task + '.gz'))
+            scaler = load(join('MinMaxScaler', task + '.gz'))
             image_features = scaler.transform(image_features)
-            gbm = load(join('SystemBack/Classifiers/LightGBM', task + '.pkl'))
+            gbm = load(join('Classifiers/LogisticRegression', task + '.pkl'))
             y_pred = gbm.predict(image_features)[0]
+            opposite = 1 - y_pred
             y_proba = gbm.predict_proba(image_features)[0][y_pred]
-            res.append({'task': names[task],
-                        'prediction': predictions[task][y_pred],
-                        'probability': y_proba})
-        print(res)
+            try:
+                for weight in weights[task][y_pred]:
+                    final_probabilities[weight] += y_proba
+                for weight in weights[task][opposite]:
+                    final_probabilities[weight] += 1 - y_proba
+
+                res.append({'task': names[task],
+                            'prediction': predictions[task][y_pred],
+                            'probability': y_proba})
+            except:
+                res.append({'task': names[task],
+                            'prediction': predictions[task][y_pred],
+                            'probability': y_proba})
+
+        for i in range(len(final_probabilities)):
+            final_probabilities[i] /= 4
+
+        prob_sum = sum(final_probabilities)
+        for i in range(len(final_probabilities)):
+            final_probabilities[i] = final_probabilities[i] / prob_sum
+
+        final_class = argmax(final_probabilities)
+        res.append({'task': 'multiclass',
+                    'prediction': final_class,
+                    'probability': final_probabilities[final_class]})
         return res
     else:
         print('Error')

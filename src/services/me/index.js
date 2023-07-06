@@ -3,15 +3,15 @@ import dotenv from 'dotenv';
 import { userModel } from "../../schemas/user.model.js";
 import { patientModel } from "../../schemas/patient.model.js";
 import { users_patientsModel } from "../../schemas/users_patients.model.js";
-import { analyzesModel } from "../../schemas/analyzes.model.js";
-import { Op } from "sequelize";
+import { liverAnalyzesModel } from "../../schemas/liverAnalyzes.model.js";
+import {Op, where} from "sequelize";
 import jwt from 'jsonwebtoken';
 import fs from 'fs';
 import path from "path";
 import {PythonShell} from "python-shell";
 
 dotenv.config();
-
+let imagesPath = path.join(fs.realpathSync("."), 'imagesdb');
 export const getProfileRouteHandler = (req, res) => {
   const meUser = req.user;
 
@@ -255,21 +255,40 @@ export const uploadImgRouteHandlerOld = async (req, res)=>{
 
   });
 }
+export const getAnalyzedRouteHandler = async (req, res)=>{
+  let patient_id = req.body.patient_id;
+  let doctor_id = req.body.doctor_id;
+  liverAnalyzesModel.findAll({
+    where:
+        {Patient_id:patient_id},
+    attributes:['FileName','Analysis'],
+    raw:true
+  }).then(data=>{
+    console.log('found analyzes');
+    console.log(data);
+    fs.readdir(path.join(imagesPath,`${doctor_id}`,`${patient_id}`,'analyzedImages'), (err, files) => {
+      const jsonData = JSON.stringify(files);
+
+    });
+    let response =[];
+    data.forEach((analiz)=>{
+      if (fs.existsSync(path.join(imagesPath,`${doctor_id}`,`${patient_id}`,'analyzedImages',`${analiz.FileName}`))) {
+        response.push({Filename:analiz.FileName, text: analiz.Analysis});
+      }
+    });
+    res.setHeader('Content-Type', 'application/json');
+    res.send(JSON.stringify(response));
+  });
+
+};
 export const analyzeRouteHandler = async (req, res)=>{
   let id = req.body.id;
   const dirname = fs.realpathSync(".");
   let patient_id = req.body.patient_id;
-  let directoryPath = path.join(`${dirname}/imagesdb`, `${id}`, `${patient_id}`);
-  let files = fs.readdirSync(directoryPath);
+
   let analyze="";
-  console.log(files);
-  console.log(directoryPath);
-  for(let i=0;i<files.length;i++)
-  {
-    files[i] = `${dirname}/imagesdb/${id}`+`/${patient_id}`+`/${files[i]}`;
-  }
-  //files.forEach((elem)=>{elem = __dirname+`/${id}`+ `/${patient_id}`+`/${elem}`});
-  console.log(files[0]);
+
+
   let task_data = req.body.task;
   let base64String = req.body.image;
   let base64Image = base64String.split(';base64,').pop();
@@ -278,12 +297,51 @@ export const analyzeRouteHandler = async (req, res)=>{
   //let fileExtension = path.extname(originalFileName);
   let filename = `${Date.now() + '-' + Math.round(Math.random() * 1E9)}.png`;
   let Image_path = path.join(dirname,`imagesdb`,`${id}`,`${patient_id}`,`analyzedImages`,filename);
+  console.log(Image_path);
   fs.writeFile(Image_path, base64Image, {encoding: 'base64'}, function(err) {
 
   });
+  /*
+  let answer_json = {"prediction":1123123,"probability":21313.12312};
+  console.log(answer_json);
+  let analyze_text_cont = "";
+  if (task_data == 1) {
+    analyze_text_cont = `Аналіз : ${answer_json["prediction"]} \n Ймовірність : ${answer_json["probability"].toFixed(4)}\n`;
+  } else if (task_data == "2") {
+    for (let i = 0; i < answer_json.length; i++) {
+      analyze_text_cont += `Задача : ${answer_json[i]["task"]}
+                            Аналіз : ${answer_json[i]["prediction"]}
+                            Ймовірність : ${answer_json[i]["probability"].toFixed(4)}\n`;
+    }
+  } else {
+    analyze_text_cont = "Error";
+  }
+
+  liverAnalyzesModel.create({ Patient_id: patient_id,FileName: filename, Analysis: analyze_text_cont});
+  res.send({task: task_data,answer:analyze_text_cont});
+
+   */
+
   PythonShell.run(path.join(`${dirname}`, `SystemBack`, `pythonfile.py`), {args:[Image_path,task_data]}).then(messages=>{
     analyze = messages[0];
-    analyzesModel.create({ Patient_id: patient_id,FileName: filename, Analysis: analyze});
-    res.send({task: task_data,answer:analyze});
+    let answer_json = JSON.parse(analyze.replace(/'/g, '"'));
+    console.log(answer_json);
+    let analyze_text_cont = "";
+    if (task_data == 1) {
+      analyze_text_cont = `Аналіз : ${answer_json["prediction"]} <br> Ймовірність : ${answer_json["probability"].toFixed(4)}`;
+    } else if (task_data == "2") {
+      for (let i = 0; i < answer_json.length; i++) {
+        analyze_text_cont += `Задача : ${answer_json[i]["task"]}
+                            Аналіз : ${answer_json[i]["prediction"]}
+                            Ймовірність : ${answer_json[i]["probability"].toFixed(4)}<br>`;
+      }
+    } else {
+      analyze_text_cont = "Error";
+    }
+
+    liverAnalyzesModel.create({ Patient_id: patient_id,FileName: filename, Analysis: analyze_text_cont});
+    res.send({task: task_data,answer:analyze_text_cont});
   });
+
+
 }

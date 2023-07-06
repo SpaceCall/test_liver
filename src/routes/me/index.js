@@ -4,7 +4,9 @@ import jwt from 'jsonwebtoken';
 import multer from 'multer';
 
 import { getProfileRouteHandler, patchProfileRouteHandler, getPatientsRouteHandler,
-  createPatientRouteHandler,changePatientRouteHandler,getPatientRouteHandler,uploadImgRouteHandler,analyzeRouteHandler } from "../../services/me/index.js";
+  createPatientRouteHandler,changePatientRouteHandler,getPatientRouteHandler,uploadImgRouteHandler,analyzeRouteHandler,
+  getAnalyzedRouteHandler
+} from "../../services/me/index.js";
 import fs from "fs";
 import path from "path";
 import {PythonShell} from 'python-shell';
@@ -66,13 +68,8 @@ router.post('/patient/getOriginals', (req, res) => {
 
 });
 router.post('/patient/getAnalyzed', (req, res) => {
-  let patient_id = req.body.patient_id;
-  let doctor_id = req.body.doctor_id;
-  fs.readdir(path.join(imagesPath,`${doctor_id}`,`${patient_id}`,'analyzedImages'), (err, files) => {
-    const jsonData = JSON.stringify(files);
-    res.setHeader('Content-Type', 'application/json');
-    res.send(jsonData);
-  });
+  getAnalyzedRouteHandler(req,res);
+
 
 });
 router.post("/patient/upload-photo", upload.single('file'),(req, res) => {
